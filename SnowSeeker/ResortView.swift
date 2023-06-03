@@ -16,6 +16,8 @@ struct ResortView: View {
     @State private var selectedFacility: Facility?
     @State private var showingFacility = false
     
+    @EnvironmentObject var favourites: Favourites
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -52,6 +54,16 @@ struct ResortView: View {
                             }
                         }
                     }
+                    
+                    Button(favourites.contains(resort) ? "Remove from Favourites" : "Add to Favourites") {
+                        if favourites.contains(resort) {
+                            favourites.remove(resort)
+                        } else {
+                            favourites.add(resort)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding()
                 }
                 .padding(.horizontal)
             }
@@ -70,5 +82,6 @@ struct SecondaryView_Previews: PreviewProvider {
         NavigationView {
             ResortView(resort: Resort.example)
         }
+        .environmentObject(Favourites())
     }
 }
