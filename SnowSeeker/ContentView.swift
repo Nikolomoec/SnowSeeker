@@ -17,11 +17,18 @@ extension View {
     }
 }
 
+enum SortingOptions {
+    case name, country, favourites
+}
+
 struct ContentView: View {
     let resorts: [Resort] = Bundle.main.decode("resorts.json")
     
     @StateObject var favourites = Favourites()
     @State private var searchText = ""
+    
+    @State private var showingSorting = false
+    @State private var sortBy: SortingOptions = .favourites
     
     var body: some View {
         NavigationView {
@@ -58,6 +65,20 @@ struct ContentView: View {
             }
             .navigationTitle("Resorts")
             .searchable(text: $searchText, prompt: "Search Resorts")
+            .confirmationDialog("Sort by...", isPresented: $showingSorting) {
+                Button("Name") { sortBy = .name }
+                Button("Country") { sortBy = .country }
+                Button("Favourites") { sortBy = .favourites }
+            } message: {
+                Text("Sort by...")
+            }
+            .toolbar {
+                Button {
+                    showingSorting = true
+                } label: {
+                    Label("Sort by", systemImage: "arrow.up.arrow.down")
+                }
+            }
             
             WelcomeView()
         }
@@ -67,9 +88,22 @@ struct ContentView: View {
     
     var filteredResorts: [Resort] {
         if searchText.isEmpty {
-            return resorts
+            return sortedResorts()
         } else {
-            return resorts.filter { $0.name.localizedStandardContains(searchText) }
+            return sortedResorts().filter { $0.name.localizedStandardContains(searchText) }
+        }
+    }
+    
+    func sortedResorts() -> [Resort] {
+        switch sortBy {
+        case .name:
+            return resorts.sorted { $0.name < $1.name }
+        case .country:
+            return resorts.sorted { $0.country < $1.country }
+        case .favourites:
+            return resorts.sorted { first, _ in
+                favourites.contains(first)
+            }
         }
     }
 }

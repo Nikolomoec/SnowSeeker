@@ -13,15 +13,10 @@ class Favourites: ObservableObject {
     
     init() {
         if let data = UserDefaults.standard.data(forKey: saveKey) {
-            do {
-                resorts = try JSONDecoder().decode(Set<String>.self, from: data)
+            if let decoded = try? JSONDecoder().decode(Set<String>.self, from: data) {
+                resorts = decoded
                 return
-            } catch {
-                print("Failed decoding data from UserDefaults")
-                resorts = []
             }
-        } else {
-            resorts = []
         }
         resorts = []
     }
